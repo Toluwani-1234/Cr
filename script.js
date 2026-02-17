@@ -57,6 +57,57 @@ qsa('nav a[href^="#"]').forEach(anchor => {
   });
 });
 
+/* ========== CONTRACT ADDRESS COPY ========== */
+const copyButton = qs('#copyButton');
+const contractAddress = qs('#contractAddress');
+
+if (copyButton && contractAddress) {
+  copyButton.addEventListener('click', async () => {
+    const address = contractAddress.textContent;
+    
+    try {
+      await navigator.clipboard.writeText(address);
+      
+      // Visual feedback
+      const originalHTML = copyButton.innerHTML;
+      copyButton.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      `;
+      copyButton.style.color = '#4ade80';
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
+        copyButton.innerHTML = originalHTML;
+        copyButton.style.color = '';
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = address;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        copyButton.style.color = '#4ade80';
+        setTimeout(() => {
+          copyButton.style.color = '';
+        }, 2000);
+      } catch (err2) {
+        console.error('Fallback copy failed:', err2);
+      }
+      
+      document.body.removeChild(textArea);
+    }
+  });
+}
+
 /* ========== NAVBAR SCROLL EFFECT ========== */
 const nav = qs('nav');
 let lastScroll = 0;
